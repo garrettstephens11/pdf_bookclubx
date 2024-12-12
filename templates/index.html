@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PDF Book Club - Upload PDF</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #15202B; /* Dark mode background */
+            color: #ffffff;
+            text-align: center;
+            padding-top: 50px;
+        }
+
+        h2 {
+            color: #1DA1F2; /* X brand color */
+        }
+
+        form {
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+        input[type="file"] {
+            background-color: #192734;
+            color: #ffffff;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        input[type="submit"] {
+            background-color: #1DA1F2;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0d8ddb;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Upload PDF</h2>
+
+<form action="/" method="post" enctype="multipart/form-data">
+  <label for="pdf_file">Select PDF to upload:</label><br><br>
+  <input type="file" name="pdf_file" accept="application/pdf" required><br><br>
+
+  <input type="submit" value="Generate">
+</form>
+
+</body>
+</html>

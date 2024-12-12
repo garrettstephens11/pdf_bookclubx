@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PDF Book Club - Results</title>
+    <!-- Include jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <!-- Include Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .section-title {
+            color: #aaaaaa;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #333333;
+            padding-bottom: 10px;
+        }
+
+        .post, .reply {
+            background-color: #1a1a1a;
+            border: 1px solid #333333;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            position: relative;
+        }
+
+        .reply {
+            margin-left: 40px; /* Indentation for replies */
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .account-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .profile-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #444444; /* Placeholder color */
+        }
+
+        .account-name {
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .btn {
+            font-size: 0.9em;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .btn.format-text {
+            background-color: #444444;
+            color: #ffffff;
+        }
+
+        .btn.generate-discussion {
+            background-color: #5555ff;
+            color: #ffffff;
+            margin-top: 10px;
+        }
+
+        .btn.generate-audio {
+            background-color: #ff5555;
+            color: #ffffff;
+            margin-top: 10px;
+        }
+
+        .btn.generate-audio:disabled {
+            background-color: #777777;
+            cursor: not-allowed;
+        }
+
+        .icons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .icon {
+            cursor: pointer;
+            font-size: 1.2em;
+            color: #ffffff;
+        }
+
+        .icon.clipboard:hover {
+            color: #00ff00;
+        }
+
+        .icon.audio:hover {
+            color: #ff9900;
+        }
+
+        .post-text {
+            font-size: 1.1em;
+            line-height: 1.5em;
+            margin: 0 0 10px 0;
+        }
+
+        .post-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .post-actions label, .post-actions input[type="text"] {
+            color: #ffffff;
+        }
+
+        .post-actions input[type="text"] {
+            background-color: #1a1a1a;
+            border: 1px solid #333333;
+            border-radius: 5px;
+            padding: 5px;
+            color: #ffffff;
+        }
+
+        /* Audio player styles */
+        audio {
+            display: block;
+            margin-top: 5px;
+            width: 100%;
+        }
+
+        /* Style for "Another Turn" checkbox */
+        .another-turn {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Ensure paragraphs have proper spacing */
+        .formatted-text p {
+            margin-bottom: 1em;
+        }
+
+        .formatted-text p:last-child {
+            margin-bottom: 0;
+        }
+
+        .formatted-text-container {
+            margin-top: 10px;
+            position: relative;
+        }
+
+        .copy-to-clipboard, .read-aloud {
+            position: absolute;
+            top: 0;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5em;
+            color: #ffffff;
+        }
+
+        .copy-to-clipboard {
+            right: 0;
+        }
+
+        .read-aloud {
+            right: 40px;
+        }
+
+        .copy-to-clipboard:hover, .read-aloud:hover {
+            color: #1DA1F2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Posts Section -->
+        <h2 class="section-title">Posts</h2>
+
+        {% for index, segment in segments %}
+            <div class="post">
+                <div class="post-header">
+                    <div class="account-info">
+                        <div class="profile-circle"></div>
+                        <span class="account-name">Segment {{ index + 1 }}</span>
+                        <!-- "Format Text (rough)" button -->
+                        <button class="btn format-text">Format Text (rough)</button>
+                    </div>
+                    <div class="icons">
+                        <!-- Clipboard icon button -->
+                        <span class="icon clipboard" title="Copy to Clipboard"><i class="fas fa-clipboard"></i></span>
+                        <!-- Read Aloud button -->
+                        <span class="icon audio" title="Read Aloud"><i class="fas fa-volume-up"></i></span>
+                    </div>
+                </div>
+
+                <!-- Formatted text container -->
+                <div class="formatted-text-container" style="display:none;">
+                    <!-- Hidden input to store the segment text -->
+                    <input type="hidden" class="segment-text" value="{{ segment }}">
+                    <!-- Formatted text area -->
+                    <!-- Use multiple <p> tags for paragraphs -->
+                    <div class="formatted-text"></div>
+                </div>
+
+                <!-- Container for the audio players -->
+                <div class="audio-container"></div>
+
+                <!-- Existing segment text (hidden when formatted text is shown) -->
+                <p class="post-text segment-text-display">{{ segment.replace('\n', '<br>')|safe }}</p>
+
+                <!-- Actions -->
+                <div class="post-actions">
+                    <!-- Generate Discussion form -->
+                    <form method="POST" action="{{ url_for('generate') }}">
+                        <input type="hidden" name="index" value="{{ index }}">
+                        <input type="hidden" name="segment" value="{{ segment }}">
+                        <button type="button" class="btn generate-discussion">Generate Discussion</button>
+                        <label for="relation_text_{{ index }}">[Optional] Relate to:</label>
+                        <input type="text" name="relation_text" id="relation_text_{{ index }}" placeholder="Your input here...">
+                        <div class="another-turn">
+                            <input type="checkbox" name="additional_turn" value="true" id="additional_turn_{{ index }}">
+                            <label for="additional_turn_{{ index }}">Another Turn</label>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Discussion Section -->
+                {% if discussions and index|string in discussions %}
+                    <div class="replies">
+                        {% for disc in discussions[index|string] %}
+                            {% set disc_num = loop.index0 %}
+                            {% if disc.lines %}
+                                {% for line in disc.lines %}
+                                    <div class="reply" data-discussion-num="{{ disc_num }}">
+                                        <div class="post-header">
+                                            <div class="account-info">
+                                                <div class="profile-circle"></div>
+                                                <span class="account-name">{{ line.speaker }}</span>
+                                            </div>
+                                            <div class="icons">
+                                                <!-- Copy to Clipboard button for discussion -->
+                                                <span class="icon clipboard" title="Copy to Clipboard"><i class="fas fa-clipboard"></i></span>
+                                            </div>
+                                        </div>
+                                        <p class="post-text">{{ line.text }}</p>
+
+                                        <!-- Audio playback control -->
+                                        {% if line.audio_url %}
+                                            <audio controls>
+                                                <source src="{{ line.audio_url }}" type="audio/mpeg">
+                                                Your browser does not support the audio element.
+                                            </audio>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <p>{{ disc.text|safe }}</p>
+                            {% endif %}
+                        {% endfor %}
+                        <!-- "Generate Voices" button -->
+                        {% if not discussions[index|string][-1].audio_generated %}
+                            <button type="button" class="btn generate-audio">Generate Voices</button>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+            </div>
+        {% endfor %}
+
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // Handler for "Format Text (rough)" button
+            $('.format-text').click(function() {
+                var postDiv = $(this).closest('.post');
+                var segmentText = postDiv.find('.segment-text-display').text();
+                $.post('{{ url_for("format_text_rough") }}', {'segment': segmentText})
+                .done(function(data) {
+                    var formattedTextContainer = postDiv.find('.formatted-text');
+                    formattedTextContainer.empty(); // Clear previous content
+
+                    if (Array.isArray(data.formatted_text)) {
+                        // Append each paragraph to the formatted text container
+                        data.formatted_text.forEach(function(paragraph) {
+                            formattedTextContainer.append('<p>' + paragraph + '</p>');
+                        });
+                    } else {
+                        // If data.formatted_text is not an array, display an error
+                        formattedTextContainer.append('<p>Error: Unable to format text.</p>');
+                    }
+
+                    postDiv.find('.formatted-text-container').show();
+                    postDiv.find('.segment-text-display').hide();
+                })
+                .fail(function(jqXHR, textStatus, errorThrown) {
+                    alert('Error formatting text: ' + jqXHR.responseText);
+                });
+            });
+
+            // Handler for "Copy to Clipboard" button
+            $('.icon.clipboard').click(function() {
+                var postDiv = $(this).closest('.post, .reply');
+                var text;
+                if (postDiv.hasClass('post')) {
+                    var contentDiv = postDiv.find('.formatted-text').is(':visible') ? postDiv.find('.formatted-text') : postDiv.find('.segment-text-display');
+                } else {
+                    var contentDiv = postDiv.find('.post-text');
+                }
+                // Get the HTML content as a string
+                var htmlContent = contentDiv.html();
+                // Replace <br> and <p> tags with line breaks
+                var textContent = htmlContent
+                    .replace(/<br\s*[\/]?>/gi, '\n')
+                    .replace(/<\/p>/gi, '\n\n')
+                    .replace(/<p[^>]*>/gi, '')
+                    .replace(/&nbsp;/gi, ' ');
+                // Remove any remaining HTML tags
+                textContent = textContent.replace(/<[^>]+>/gi, '');
+                navigator.clipboard.writeText(textContent).then(function() {
+                    alert('Text copied to clipboard');
+                }, function(err) {
+                    alert('Could not copy text: ' + err);
+                });
+            });
+
+            // Handler for "Read Aloud" button
+            $('.icon.audio').click(function() {
+                var postDiv = $(this).closest('.post');
+                var segmentText = postDiv.find('.formatted-text').is(':visible') ? postDiv.find('.formatted-text').text() : postDiv.find('.segment-text-display').text();
+
+                $.post('{{ url_for("generate_segment_audio") }}', {'segment_text': segmentText})
+                .done(function(data) {
+                    var audioUrls = data.audio_urls;
+                    var audioContainer = postDiv.find('.audio-container');
+                    audioContainer.empty();
+                    audioUrls.forEach(function(url) {
+                        audioContainer.append(
+                            '<audio controls>' +
+                            '<source src="' + url + '" type="audio/mpeg">' +
+                            'Your browser does not support the audio element.' +
+                            '</audio>'
+                        );
+                    });
+                })
+                .fail(function(jqXHR, textStatus, errorThrown) {
+                    alert('Error generating audio: ' + jqXHR.responseText);
+                });
+            });
+
+            // Handler for "Generate Discussion" button
+            $('.generate-discussion').click(function() {
+                var form = $(this).closest('form');
+                var index = form.find('input[name="index"]').val();
+                var segment = form.find('input[name="segment"]').val();
+                var relation_text = form.find('input[name="relation_text"]').val();
+                var additional_turn = form.find('input[name="additional_turn"]').is(':checked') ? 'true' : 'false';
+
+                $.post('{{ url_for("generate") }}', {
+                    'index': index,
+                    'segment': segment,
+                    'relation_text': relation_text,
+                    'additional_turn': additional_turn
+                })
+                .done(function(data) {
+                    location.reload();
+                })
+                .fail(function(jqXHR, textStatus, errorThrown) {
+                    alert('Error generating discussion: ' + jqXHR.responseText);
+                });
+            });
+
+            // Handler for "Generate Voices" button
+            $('.generate-audio').click(function() {
+                var repliesDiv = $(this).closest('.replies');
+                var index = repliesDiv.closest('.post').find('input[name="index"]').val();
+                var discussion_num = repliesDiv.find('.reply').first().data('discussion-num');
+
+                $.post('{{ url_for("generate_audio") }}', {
+                    'index': index,
+                    'discussion_num': discussion_num
+                })
+                .done(function(data) {
+                    // Update the replies with audio URLs
+                    var lines = data.discussion_lines;
+                    repliesDiv.find('.reply').each(function(i) {
+                        if (lines[i].audio_url) {
+                            $(this).find('.post-text').after(
+                                '<audio controls>' +
+                                '<source src="' + lines[i].audio_url + '" type="audio/mpeg">' +
+                                'Your browser does not support the audio element.' +
+                                '</audio>'
+                            );
+                        }
+                    });
+                    // Disable the "Generate Voices" button
+                    repliesDiv.find('.generate-audio').prop('disabled', true);
+                })
+                .fail(function(jqXHR, textStatus, errorThrown) {
+                    alert('Error generating audio: ' + jqXHR.responseText);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

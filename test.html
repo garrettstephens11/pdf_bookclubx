@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Posts and Replies</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .section-title {
+            color: #aaaaaa;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #333333;
+            padding-bottom: 10px;
+        }
+
+        .post, .reply {
+            background-color: #1a1a1a;
+            border: 1px solid #333333;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+        }
+
+        .reply {
+            margin-left: 40px; /* Indentation for replies */
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .account-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .profile-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #444444; /* Placeholder color */
+        }
+
+        .account-name {
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .btn {
+            font-size: 0.9em;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .btn.format-text {
+            background-color: #444444;
+            color: #ffffff;
+        }
+
+        .btn.generate-discussion {
+            background-color: #5555ff;
+            color: #ffffff;
+            margin-top: 10px;
+        }
+
+        .icons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .icon {
+            cursor: pointer;
+            font-size: 1.2em;
+        }
+
+        .icon.clipboard:hover {
+            color: #00ff00;
+        }
+
+        .icon.audio:hover {
+            color: #ff9900;
+        }
+
+        .post-text {
+            font-size: 1.1em;
+            line-height: 1.5em;
+            margin: 0 0 10px 0;
+        }
+
+        .post-actions {
+            display: flex;
+            justify-content: flex-start;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Posts Section -->
+        <h2 class="section-title">Posts</h2>
+        <div class="post">
+            <div class="post-header">
+                <div class="account-info">
+                    <div class="profile-circle"></div>
+                    <span class="account-name">Elon Musk</span>
+                    <button class="btn format-text">Format Text Tough</button>
+                </div>
+                <div class="icons">
+                    <span class="icon clipboard">📋</span>
+                    <span class="icon audio">🔊</span>
+                </div>
+            </div>
+            <p class="post-text">The major problem is that social activists are being appointed to judicial positions.</p>
+            <div class="post-actions">
+                <button class="btn generate-discussion">Generate Discussion</button>
+            </div>
+        </div>
+        <div class="post">
+            <div class="post-header">
+                <div class="account-info">
+                    <div class="profile-circle"></div>
+                    <span class="account-name">Donald Trump</span>
+                    <button class="btn format-text">Format Text Tough</button>
+                </div>
+                <div class="icons">
+                    <span class="icon clipboard">📋</span>
+                    <span class="icon audio">🔊</span>
+                </div>
+            </div>
+            <p class="post-text">The Democrats are trying to stack the courts with Radical Left Judges.</p>
+            <div class="post-actions">
+                <button class="btn generate-discussion">Generate Discussion</button>
+            </div>
+        </div>
+
+        <!-- Replies Section -->
+        <h2 class="section-title">Replies</h2>
+        <div class="reply">
+            <div class="post-header">
+                <div class="account-info">
+                    <div class="profile-circle"></div>
+                    <span class="account-name">Will Manidis</span>
+                    <button class="btn format-text">Format Text Tough</button>
+                </div>
+                <div class="icons">
+                    <span class="icon clipboard">📋</span>
+                    <span class="icon audio">🔊</span>
+                </div>
+            </div>
+            <p class="post-text">What is the most underrated PDF available online?</p>
+            <div class="post-actions">
+                <button class="btn generate-discussion">Generate Discussion</button>
+            </div>
+        </div>
+        <div class="reply">
+            <div class="post-header">
+                <div class="account-info">
+                    <div class="profile-circle"></div>
+                    <span class="account-name">taoki</span>
+                    <button class="btn format-text">Format Text Tough</button>
+                </div>
+                <div class="icons">
+                    <span class="icon clipboard">📋</span>
+                    <span class="icon audio">🔊</span>
+                </div>
+            </div>
+            <p class="post-text">Christianity > Judaism > Buddhism > Islam > Hinduism > Atheism</p>
+            <div class="post-actions">
+                <button class="btn generate-discussion">Generate Discussion</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

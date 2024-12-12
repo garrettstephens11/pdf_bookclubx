@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PDF Book Club - Results</title>
+    <!-- Include jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <!-- Include Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* General styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .section-title {
+            color: #aaaaaa;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #333333;
+            padding-bottom: 10px;
+        }
+
+        .post, .reply {
+            background-color: #1a1a1a;
+            border: 1px solid #333333;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            position: relative;
+        }
+
+        .reply {
+            margin-left: 40px; /* Indentation for replies */
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .account-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .profile-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #444444; /* Placeholder color */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5em;
+            color: #ffffff;
+        }
+
+        .account-name {
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .btn {
+            font-size: 0.9em;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .btn.format-text {
+            background-color: #444444;
+            color: #ffffff;
+        }
+
+        .btn.generate-audio {
+            background-color: #ff5555;
+            color: #ffffff;
+            margin-top: 10px;
+        }
+
+        .btn.generate-audio:disabled {
+            background-color: #777777;
+            cursor: not-allowed;
+        }
+
+        .icons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .icon {
+            cursor: pointer;
+            font-size: 1.2em;
+            color: #ffffff;
+        }
+
+        .icon.clipboard:hover {
+            color: #00ff00;
+        }
+
+        .icon.audio:hover {
+            color: #ff9900;
+        }
+
+        .post-text {
+            font-size: 1.1em;
+            line-height: 1.5em;
+            margin: 0 0 10px 0;
+        }
+
+        .post-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            position: relative;
+        }
+
+        .post-actions label, .post-actions input[type="text"] {
+            color: #ffffff;
+        }
+
+        .post-actions input[type="text"] {
+            background-color: #1a1a1a;
+            border: 1px solid #333333;
+            border-radius: 5px;
+            padding: 5px;
+            color: #ffffff;
+        }
+
+        .generate-discussion-container, .talk-to-me-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .btn.generate-discussion {
+            background-color: #5555ff;
+            color: #ffffff;
+            margin-top: 10px;
+        }
+
+        .btn.talk-to-me {
+            background-color: #55ff55;
+            color: #ffffff;
+            margin-top: 10px;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%; /* Aligns menu directly below the button */
+            left: 0;
+            background-color: #1a1a1a;
+            border: 1px solid #333333;
+            border-radius: 5px;
+            z-index: 1;
+            min-width: 150px; /* Adjust as needed */
+        }
+
+        .dropdown-item {
+            color: #ffffff;
+            padding: 10px;
+            display: block;
+            text-decoration: none;
+        }
+
+        .dropdown-item:hover {
+            background-color: #5555ff;
+        }
+
+        /* Audio player styles */
+        audio {
+            display: block;
+            margin-top: 5px;
+            width: 100%;
+        }
+
+        /* Ensure paragraphs have proper spacing */
+        .formatted-text p {
+            margin-bottom: 1em;
+        }
+
+        .formatted-text p:last-child {
+            margin-bottom: 0;
+        }
+
+        .formatted-text-container {
+            margin-top: 10px;
+            position: relative;
+        }
+
+        .copy-to-clipboard, .read-aloud {
+            position: absolute;
+            top: 0;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5em;
+            color: #ffffff;
+        }
+
+        .copy-to-clipboard {
+            right: 0;
+        }
+
+        .read-aloud {
+            right: 40px;
+        }
+
+        /* Highlighting styles */
+        .highlighted {
+            background-color: yellow; /* Yellow highlight */
+            color: black; /* Black text */
+            padding: 2px;
+        }
+
+        .sentence {
+            display: inline;
+        }
+
+        .discussion-highlighted {
+            background-color: yellow; /* Yellow highlight */
+            color: black; /* Black text */
+            padding: 2px;
+        }
+
+        /* Spinner for loading indicator (optional) */
+        .spinner {
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #5555ff;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: auto;
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .talk-to-me-container:hover .talk-to-me-menu,
+        .generate-discussion-container:hover .dropdown-menu {
+            display: block;
+        }
+
+        /* Modal for "Talk to Me" */
+        #talkToMeModal {
+            display:none; 
+            position: fixed; 
+            z-index: 9999; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        #talkToMeModalContent {
+            background-color: #1a1a1a; 
+            margin: 50px auto; 
+            padding: 20px; 
+            border: 1px solid #333; 
+            width: 50%; 
+            border-radius: 10px; 
+            position: relative;
+        }
+
+        #closeModal {
+            color:#aaa; 
+            float:right; 
+            font-size:28px; 
+            font-weight:bold; 
+            cursor:pointer;
+        }
+
+        #chatContainer {
+            max-height:300px; 
+            overflow-y:auto; 
+            margin-bottom: 20px; 
+            border:1px solid #333; 
+            padding:10px; 
+            border-radius:5px; 
+            background-color:#121212;
+        }
+
+        #userQuery {
+            width:100%; 
+            padding:10px; 
+            background-color:#121212; 
+            color:#fff; 
+            border:1px solid #333; 
+            border-radius:5px;
+        }
+
+        #sendQueryButton {
+            margin-top:10px; 
+            background-color:#5555ff; 
+            color:#fff; 
+            border:none; 
+            padding:10px; 
+            border-radius:5px; 
+            cursor:pointer;
+        }
+
+        /* Floating audio player */
+        #floatingAudioPlayer {
+            display: none; /* Hidden by default until audio generated */
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 10px;
+            z-index: 9999;
+            width: 300px;
+        }
+
+        #floatingAudioPlayer .player-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+        }
+
+        #floatingAudioPlayer .play-pause {
+            font-size: 2em;
+            cursor: pointer;
+            color: #ffffff;
+        }
+
+        #floatingAudioPlayer .play-pause:hover {
+            color: #00ff00;
+        }
+
+        #floatingAudioPlayer .track-info {
+            text-align: center;
+            font-size: 0.9em;
+            color: #aaaaaa;
+            margin-top: 5px;
+        }
+
+        #playbackRateSelect {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            border: 1px solid #333;
+            border-radius: 5px;
+            padding: 2px 5px;
+        }
+
+        #playbackRateSelect option {
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Posts Section -->
+        <h2 class="section-title">Posts</h2>
+
+        {% for index, segment in segments %}
+            <div class="post" data-index="{{ index }}">
+                <div class="post-header">
+                    <div class="account-info">
+                        <div class="profile-circle">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <span class="account-name">Segment {{ index + 1 }}</span>
+                        <button class="btn format-text">Format Text (rough)</button>
+                    </div>
+                    <div class="icons">
+                        <span class="icon clipboard" title="Copy to Clipboard"><i class="fas fa-clipboard"></i></span>
+                        <span class="icon audio" title="Read Aloud"><i class="fas fa-volume-up"></i></span>
+                    </div>
+                </div>
+
+                <div class="formatted-text-container" style="display:none;">
+                    <div class="formatted-text"></div>
+                </div>
+
+                <div class="audio-container"></div>
+
+                <p class="post-text segment-text-display">{{ segment.replace('\n', '<br>')|safe }}</p>
+
+                <div class="post-actions" style="display:flex; justify-content: space-between; align-items:center;">
+                    <div style="display:inline-block;">
+                        <div class="generate-discussion-container" style="display:inline-block; position:relative;">
+                            <button type="button" class="btn generate-discussion">Generate Discussion</button>
+                            <div class="dropdown-menu">
+                                <a href="#" class="dropdown-item generate-xai">Use xAI</a>
+                                <a href="#" class="dropdown-item generate-openai">Use OpenAI</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="talk-to-me-container" style="display:inline-block; position:relative;">
+                        <button type="button" class="btn talk-to-me">Talk to Me</button>
+                        <div class="dropdown-menu talk-to-me-menu">
+                            <a href="#" class="dropdown-item talk-to-xai">Use xAI</a>
+                            <a href="#" class="dropdown-item talk-to-openai">Use OpenAI</a>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="relation_text_{{ index }}">[Optional] Relate to:</label>
+                        <input type="text" name="relation_text" id="relation_text_{{ index }}" placeholder="Your input here...">
+                    </div>
+                </div>
+
+                {% if discussions and index|string in discussions %}
+                    <div class="replies">
+                        {% for disc_num, disc in discussions[index|string]|enumerate %}
+                            <div class="discussion" data-discussion-num="{{ disc_num }}">
+                                <div class="post-header">
+                                    <div class="account-info">
+                                        <div class="profile-circle">
+                                            <i class="fas fa-chalkboard-teacher"></i>
+                                        </div>
+                                        <span class="account-name">Discussion {{ disc_num + 1 }}</span>
+                                    </div>
+                                    <div class="icons">
+                                        <span class="icon clipboard" title="Copy to Clipboard"><i class="fas fa-clipboard"></i></span>
+                                    </div>
+                                </div>
+                                {% if disc.lines %}
+                                    {% for line in disc.lines %}
+                                        <p>
+                                            <strong>{{ line.speaker }}: </strong><span>{{ line.text }}</span>
+                                            {% if line.audio_url %}
+                                                <audio controls>
+                                                    <source src="{{ line.audio_url }}" type="audio/mpeg">
+                                                    Your browser does not support the audio element.
+                                                </audio>
+                                            {% endif %}
+                                        </p>
+                                    {% endfor %}
+                                {% else %}
+                                    <p>{{ disc.text|safe }}</p>
+                                {% endif %}
+                                {% if not disc.audio_generated %}
+                                    <button type="button" class="btn generate-audio">Generate Voices</button>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Modal for "Talk to Me" -->
+    <div id="talkToMeModal">
+        <div id="talkToMeModalContent">
+            <span id="closeModal">&times;</span>
+            <h2 style="color:#ffffff;">Ask Questions</h2>
+            <div id="chatContainer"></div>
+            <textarea id="userQuery" placeholder="Type your question..."></textarea>
+            <button id="sendQueryButton" class="btn">Send</button>
+        </div>
+    </div>
+
+    <!-- Floating audio player -->
+    <div id="floatingAudioPlayer">
+        <div class="player-controls">
+            <span class="play-pause" id="playPauseButton"><i class="fas fa-play"></i></span>
+            <!-- Playback rate selector -->
+            <select id="playbackRateSelect">
+                <option value="0.5">0.5x</option>
+                <option value="1" selected>1x</option>
+                <option value="1.5">1.5x</option>
+                <option value="2">2x</option>
+            </select>
+        </div>
+        <div class="track-info" id="trackInfo"></div>
+        <audio id="floatingAudio"></audio>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            var currentHighlightedIndex = -1;
+            var currentSegmentElement = null;
+
+            // Audio player variables
+            var audioQueue = [];
+            var currentTrackIndex = 0;
+            var isPlaying = false;
+            var playbackRate = 1; // Default playback rate
+
+            var floatingAudio = $('#floatingAudio')[0];
+            var playPauseButton = $('#playPauseButton');
+            var trackInfo = $('#trackInfo');
+
+            function highlightSentence(segmentElement) {
+                segmentElement.find('p').each(function() {
+                    var paragraphHTML = $(this).html();
+                    var sentences = paragraphHTML.match(/[^.!?]+[.!?]+[\])'"`’”]*|.+$/g);
+                    if (sentences === null) {
+                        sentences = [paragraphHTML];
+                    }
+                    for (var i = 0; i < sentences.length; i++) {
+                        sentences[i] = '<span class="sentence">' + sentences[i].trim() + '</span>';
+                    }
+                    $(this).html(sentences.join(' '));
+                });
+            }
+
+            function moveToNextSentence() {
+                if (!currentSegmentElement) return;
+                var sentences = currentSegmentElement.find('.sentence');
+                if (currentHighlightedIndex >= 0) {
+                    $(sentences[currentHighlightedIndex]).removeClass('highlighted');
+                }
+                currentHighlightedIndex++;
+                if (currentHighlightedIndex < sentences.length) {
+                    $(sentences[currentHighlightedIndex]).addClass('highlighted');
+                } else {
+                    currentHighlightedIndex = -1;
+                }
+            }
+
+            $(document).keydown(function(e) {
+                if (e.keyCode == 39) {
+                    moveToNextSentence();
+                }
+            });
+
+            $('.format-text').click(function() {
+                var postDiv = $(this).closest('.post');
+                var segmentText = postDiv.find('.segment-text-display').text();
+                $.post('{{ url_for("format_text_rough") }}', {'segment': segmentText})
+                .done(function(data) {
+                    var formattedTextContainer = postDiv.find('.formatted-text');
+                    formattedTextContainer.empty();
+
+                    if (Array.isArray(data.formatted_text)) {
+                        data.formatted_text.forEach(function(paragraph) {
+                            formattedTextContainer.append('<p>' + paragraph + '</p>');
+                        });
+                    } else {
+                        formattedTextContainer.append('<p>Error: Unable to format text.</p>');
+                    }
+
+                    postDiv.find('.formatted-text-container').show();
+                    postDiv.find('.segment-text-display').hide();
+
+                    currentSegmentElement = formattedTextContainer;
+                    currentHighlightedIndex = -1; 
+                    highlightSentence(currentSegmentElement);
+                    moveToNextSentence();
+                })
+                .fail(function(jqXHR) {
+                    alert('Error formatting text: ' + jqXHR.responseText);
+                });
+            });
+
+            $(document).on('click', '.icon.clipboard', function() {
+                var postDiv = $(this).closest('.post, .reply, .discussion');
+                var contentDiv;
+                if (postDiv.hasClass('post')) {
+                    contentDiv = postDiv.find('.formatted-text').is(':visible') ? postDiv.find('.formatted-text') : postDiv.find('.segment-text-display');
+                } else {
+                    contentDiv = postDiv.find('p');
+                }
+                var textContent = '';
+                contentDiv.each(function() {
+                    textContent += $(this).text() + '\n\n';
+                });
+                navigator.clipboard.writeText(textContent).then(function() {
+                    alert('Text copied to clipboard');
+                }, function(err) {
+                    alert('Could not copy text: ' + err);
+                });
+            });
+
+            // Read Aloud with floating player
+            $('.icon.audio').click(function() {
+                var postDiv = $(this).closest('.post');
+                var segmentText = postDiv.find('.formatted-text').is(':visible') ? postDiv.find('.formatted-text').text() : postDiv.find('.segment-text-display').text();
+
+                $.post('{{ url_for("generate_segment_audio") }}', {'segment_text': segmentText})
+                .done(function(data) {
+                    audioQueue = data.audio_urls;
+                    currentTrackIndex = 0;
+                    if (audioQueue.length > 0) {
+                        $('#floatingAudioPlayer').show();
+                        loadTrack(currentTrackIndex);
+                        playTrack();
+                    }
+                })
+                .fail(function(jqXHR) {
+                    alert('Error generating audio: ' + jqXHR.responseText);
+                });
+            });
+
+            function loadTrack(index) {
+                if (index >= 0 && index < audioQueue.length) {
+                    floatingAudio.src = audioQueue[index];
+                    floatingAudio.playbackRate = playbackRate;
+                    trackInfo.text('Track ' + (index + 1) + ' of ' + audioQueue.length);
+                }
+            }
+
+            function playTrack() {
+                floatingAudio.play().then(() => {
+                    isPlaying = true;
+                    playPauseButton.html('<i class="fas fa-pause"></i>');
+                }).catch((err) => {
+                    console.log('Error playing audio:', err);
+                });
+            }
+
+            function pauseTrack() {
+                floatingAudio.pause();
+                isPlaying = false;
+                playPauseButton.html('<i class="fas fa-play"></i>');
+            }
+
+            playPauseButton.click(function() {
+                if (isPlaying) {
+                    pauseTrack();
+                } else {
+                    playTrack();
+                }
+            });
+
+            floatingAudio.addEventListener('ended', function() {
+                currentTrackIndex++;
+                if (currentTrackIndex < audioQueue.length) {
+                    loadTrack(currentTrackIndex);
+                    playTrack();
+                } else {
+                    // Reached end of queue
+                    pauseTrack();
+                    currentTrackIndex = 0; 
+                    loadTrack(currentTrackIndex);
+                }
+            });
+
+            // Change playback rate
+            $('#playbackRateSelect').change(function() {
+                playbackRate = parseFloat($(this).val());
+                floatingAudio.playbackRate = playbackRate;
+            });
+
+            // Generate Discussion
+            $('.dropdown-item.generate-xai, .dropdown-item.generate-openai').click(function(e) {
+                e.preventDefault();
+                var postDiv = $(this).closest('.post');
+                var index = postDiv.data('index');
+                var segment = postDiv.find('.formatted-text').is(':visible') ? postDiv.find('.formatted-text').text() : postDiv.find('.segment-text-display').text();
+                var relation_text = postDiv.find('input[name="relation_text"]').val();
+
+                var use_xai = $(this).hasClass('generate-xai');
+
+                $.post('{{ url_for("generate") }}', {
+                    'index': index,
+                    'segment': segment,
+                    'relation_text': relation_text,
+                    'use_xai': use_xai
+                })
+                .done(function(data) {
+                    var discussion = data.discussion;
+                    var discussion_lines = data.discussion_lines;
+
+                    var repliesDiv = postDiv.find('.replies');
+                    if (repliesDiv.length === 0) {
+                        repliesDiv = $('<div class="replies"></div>');
+                        postDiv.append(repliesDiv);
+                    }
+
+                    var discussionNum = repliesDiv.find('.discussion').length;
+                    var discussionDiv = $('<div class="discussion"></div>').attr('data-discussion-num', discussionNum);
+                    var header = $('<div class="post-header"></div>');
+                    var accountInfo = $('<div class="account-info"></div>');
+                    accountInfo.append('<div class="profile-circle"><i class="fas fa-chalkboard-teacher"></i></div>');
+                    accountInfo.append('<span class="account-name">Discussion</span>');
+                    var iconsDiv = $('<div class="icons"></div>');
+                    var copyIcon = $('<span class="icon clipboard" title="Copy to Clipboard"><i class="fas fa-clipboard"></i></span>');
+                    iconsDiv.append(copyIcon);
+                    header.append(accountInfo).append(iconsDiv);
+                    discussionDiv.append(header);
+
+                    discussion_lines.forEach(function(line) {
+                        var p = $('<p></p>');
+                        var speaker = $('<strong></strong>').text(line.speaker + ': ');
+                        var text = $('<span></span>').text(line.text);
+                        p.append(speaker).append(text);
+                        discussionDiv.append(p);
+                    });
+
+                    var generateAudioButton = $('<button type="button" class="btn generate-audio">Generate Voices</button>');
+                    discussionDiv.append(generateAudioButton);
+
+                    repliesDiv.append(discussionDiv);
+                })
+                .fail(function(jqXHR) {
+                    alert('Error generating discussion: ' + jqXHR.responseText);
+                });
+            });
+
+            // Generate Voices for discussion
+            $(document).on('click', '.generate-audio', function() {
+                var discussionDiv = $(this).closest('.discussion');
+                var postDiv = $(this).closest('.post');
+                var index = postDiv.data('index');
+                var discussion_num = discussionDiv.data('discussion-num');
+
+                var button = $(this);
+                button.prop('disabled', true).text('Generating Audio...');
+
+                $.post('{{ url_for("generate_audio") }}', {
+                    'index': index,
+                    'discussion_num': discussion_num
+                })
+                .done(function(data) {
+                    var lines = data.discussion_lines;
+                    discussionDiv.find('p').each(function(i) {
+                        if (lines[i].audio_url) {
+                            var audioHtml = '<audio controls><source src="' + lines[i].audio_url + '" type="audio/mpeg">Your browser does not support the audio element.</audio>';
+                            $(this).append(audioHtml);
+                        }
+                    });
+                    button.prop('disabled', true).text('Voices Generated');
+                })
+                .fail(function(jqXHR) {
+                    alert('Error generating audio: ' + jqXHR.responseText);
+                    button.prop('disabled', false).text('Generate Voices');
+                });
+            });
+
+            // "Talk to Me" feature
+            var currentSegmentText = '';
+            var currentModelChoice = '';
+            var currentIndex = null;
+
+            $('.talk-to-xai, .talk-to-openai').click(function(e) {
+                e.preventDefault();
+                var postDiv = $(this).closest('.post');
+                currentIndex = postDiv.data('index');
+
+                if (postDiv.find('.formatted-text').is(':visible')) {
+                    currentSegmentText = postDiv.find('.formatted-text').text();
+                } else {
+                    currentSegmentText = postDiv.find('.segment-text-display').text();
+                }
+
+                if ($(this).hasClass('talk-to-xai')) {
+                    currentModelChoice = 'xai';
+                } else {
+                    currentModelChoice = 'openai';
+                }
+
+                $('#talkToMeModal').show();
+                $('#chatContainer').empty();
+                $('#userQuery').val('');
+                $('#chatContainer').append('<div style="margin-bottom:10px;"><strong>System:</strong> You can ask questions about this segment. Just type and send!</div>');
+            });
+
+            $('#closeModal').click(function() {
+                $('#talkToMeModal').hide();
+                currentModelChoice = '';
+                currentSegmentText = '';
+                currentIndex = null;
+            });
+
+            $('#sendQueryButton').click(function() {
+                var userQuestion = $('#userQuery').val().trim();
+                if (!userQuestion) return;
+
+                $('#chatContainer').append('<div style="margin-bottom:10px;"><strong>You:</strong> ' + userQuestion + '</div>');
+                $('#userQuery').val('');
+
+                $.post('{{ url_for("talk_to_segment") }}', {
+                    'segment': currentSegmentText,
+                    'model': currentModelChoice,
+                    'query': userQuestion
+                })
+                .done(function(data) {
+                    $('#chatContainer').append('<div style="margin-bottom:10px;"><strong>Assistant:</strong> ' + data.response + '</div>');
+                    $('#chatContainer').scrollTop($('#chatContainer')[0].scrollHeight);
+                })
+                .fail(function(jqXHR) {
+                    alert('Error: ' + jqXHR.responseText);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
